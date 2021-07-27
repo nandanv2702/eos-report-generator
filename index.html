@@ -13,41 +13,45 @@
 
         <!-- chart js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <!-- bootstrap -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     </head>
 
     <body>
+        <div class="jumbotron">
+            <h1 class="display-4">EOS Report Generator</h1>
+            <p class="lead">Upload files using the button below</p>
+            <div class="form-group">
+
+                <form action="" id="file_uploader">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                        </div>
+                        <div class="custom-file">
+                          <input type="file" class="custom-file-input" id="files" aria-describedby="inputGroupFileAddon01" accept=".xlsx" multiple>
+                          <label class="custom-file-label" for="files">Choose file</label>
+                        </div>
+                      </div>
+                </form>
+    
+            </div>
+          </div>
         <div>
             
-            <h1>
-                EOS Report Generator
-            </h1>
-
         </div>
-
-        <div>
-
-            <form action="" id="file_uploader">
-                <label for="files">Upload Files</label>
-                <input type="file" id="files" name=="files" accept=".xlsx" multiple/>
-            </form>
-
-        </div>
-
-        <div>
-            
-        </div>
-
-        <div style="width: 500px; align-items: center" id="chart_holder">
-            <canvas id="myChart" ></canvas>
-          </div>          
-
-        <div>
-            <table id="data">
-
-            </table>
-        </div>
-
         
+        <div>
+            <div style="width: 600px; align-content: center;" id="chart_holder" class="mx-auto">
+                <canvas id="myChart" ></canvas>
+            </div>
 
+            <div class="mx-auto justify-content-center px-md-5 py-md-5">
+                <table id="data">
+    
+                </table>
+            </div>
+        </div>
     </body>
 </html>
