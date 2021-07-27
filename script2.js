@@ -66,7 +66,21 @@ var interval = setInterval(function() {
 
                         });
 
-                        console.log(Object.items(sort_by_leg))
+                        $('#data').DataTable( { 
+                            "aaData": data,
+                            "aoColumns": [
+                                {"title": "column1"},
+                                {"title": "column2"},
+                                {"title": "column3"},
+                                {"title": "column1"},
+                                {"title": "column2"},
+                                {"title": "column3"},
+                                {"title": "column1"},
+                                {"title": "column2"},
+                                {"title": "column3"},
+                                {"title": "soemotiej"}
+                                ]
+                        }); 
                     });
 
                 });
