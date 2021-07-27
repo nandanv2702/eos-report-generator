@@ -6,6 +6,8 @@
 
 // send the new array to the viewer
 
+let dataTableSet = false;
+
 console.log("script two enabled");
 
 // Polling for the sake of my intern tests
@@ -13,6 +15,10 @@ var interval = setInterval(function() {
     if(document.readyState === 'complete') {
 
         document.getElementById("files").addEventListener("change", e => {
+
+            // destroy datatable
+            document.getElementById("data").innerHTML = ""
+
             handleFiles(e)
             .then(res => {
                 Promise.all(res).then(data => {
@@ -82,11 +88,16 @@ var interval = setInterval(function() {
                         // Create a new array with only the first 5 items
                         console.log(items.slice(0, 8));
 
-                        let final_render = items.slice(0,8) 
+                        let final_render = items.slice(0,8);
+
+                        document.getElementById("myChart").remove();
+                        let canvas = document.createElement("canvas");
+                        canvas.setAttribute("id", "myChart");
+                        document.querySelector("#chart_holder").appendChild(canvas);
 
                         let ctx = document.getElementById("myChart");
 
-                        new Chart(ctx, {
+                        chart = new Chart(ctx, {
                             type: 'bar', 
                             data: {
                                 labels: final_render.map(loc => loc[0]),
@@ -117,7 +128,9 @@ var interval = setInterval(function() {
                             }
                         })
 
-
+                        if(dataTableSet){
+                            $("#data").dataTable().fnDestroy()
+                        };
 
                         $('#data').DataTable( { 
                             "aaData": res,
@@ -134,6 +147,8 @@ var interval = setInterval(function() {
                                 {"title": "Time"}
                                 ]
                         }); 
+
+                        dataTableSet = true
                     });
 
                 });
