@@ -7,6 +7,7 @@
 // send the new array to the viewer
 
 let dataTableSet = false;
+let global_res = [];
 
 console.log("script two enabled");
 
@@ -14,7 +15,13 @@ console.log("script two enabled");
 var interval = setInterval(function() {
     if(document.readyState === 'complete') {
 
+        document.getElementById("download_xlsx").addEventListener("click", () => {
+            saveFile(global_res)
+        })
+
         document.getElementById("files").addEventListener("change", e => {
+
+            document.getElementById("download_xlsx").style.display = ""
 
             // destroy datatable
             document.getElementById("data").innerHTML = ""
@@ -48,7 +55,7 @@ var interval = setInterval(function() {
                         
                     })
                     .then(res => {
-                        // saveFile(data)
+                        global_res = res;
                         const sort_by_leg = {}
 
 
@@ -71,8 +78,6 @@ var interval = setInterval(function() {
 
 
                         });
-
-                        // console.log(new Array(Object.keys(sort_by_leg)))
 
                         // sort station by highest downtime and render top 8 in pie chart
                         // Create items array
@@ -121,8 +126,24 @@ var interval = setInterval(function() {
                                     legend: false,
                                     title:{
                                         display: true,
-                                        text: "Station vs. Downtime",
+                                        text: "Station vs. Downtime (s)",
                                         fullsize: true
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: "Downtime (s)",
+                                            fullsize: true
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: "Station",
+                                            fullsize: true
+                                        }
                                     }
                                 }
                             }
@@ -265,8 +286,8 @@ async function readSheet(worksheet){
 function saveFile(data){
     const book = XLSX.utils.book_new();
     const sheet = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(book, sheet, 'EOS_compiled_data');
-    XLSX.writeFile(book, `eosdata.xlsx`);
+    XLSX.utils.book_append_sheet(book, sheet, 'EOS_Compiled_Data');
+    XLSX.writeFile(book, `EOS_Report_RawData.xlsx`);
 };
 
 function cleanNumber(number){
