@@ -4,11 +4,15 @@
             EOS Report Generator
         </title>
 
+        <!-- jquery, xlsx package, script attachment -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
         <script src="./script2.js"></script>
         <script src="http://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
         <link rel="stylesheet" href="http://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+
+        <!-- chart js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
 
     <body>
@@ -32,6 +36,10 @@
         <div>
             
         </div>
+
+        <div style="width: 500px; align-items: center">
+            <canvas id="myChart" ></canvas>
+          </div>          
 
         <div>
             <table id="data">

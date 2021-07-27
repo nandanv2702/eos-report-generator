@@ -34,20 +34,20 @@ var interval = setInterval(function() {
 
                     Promise.all(sheet_results)
                     .then(res => {
-                        let compiled_results = [["Location", "Issue", "Downtime (s)", "Root Cause", "Reason", "Corrective Action", "Owner", "Shift", "Date", "Time"]];
+                        let compiled_results = [];
 
                         res.map(sheet_entry => compiled_results.push(...sheet_entry));
 
                         return compiled_results
                         
                     })
-                    .then(data => {
+                    .then(res => {
                         // saveFile(data)
                         const sort_by_leg = {}
 
 
-                        console.log(data);
-                        data.map((row, idx) => {
+                        console.log(res);
+                        res.map((row, idx) => {
                             if(idx != 0){
                                 let keys = Object.keys(sort_by_leg);
 
@@ -66,19 +66,72 @@ var interval = setInterval(function() {
 
                         });
 
+                        // console.log(new Array(Object.keys(sort_by_leg)))
+
+                        // sort station by highest downtime and render top 8 in pie chart
+                        // Create items array
+                        var items = Object.keys(sort_by_leg).map(function(key) {
+                            return [key, sort_by_leg[key]];
+                        });
+                        
+                        // Sort the array based on the second element
+                        items.sort(function(first, second) {
+                            return second[1] - first[1];
+                        });
+                        
+                        // Create a new array with only the first 5 items
+                        console.log(items.slice(0, 8));
+
+                        let final_render = items.slice(0,8) 
+
+                        let ctx = document.getElementById("myChart");
+
+                        new Chart(ctx, {
+                            type: 'bar', 
+                            data: {
+                                labels: final_render.map(loc => loc[0]),
+                                datasets: [{
+                                  data: final_render.map(loc => loc[1]),
+                                  backgroundColor: [
+                                    '#DCD106',
+                                    '#D1DA9F',
+                                    '#E35184',
+                                    '#FAD7FF',
+                                    '#6ECC49',
+                                    '#ED2B34',
+                                    '#D1DA9F',
+                                    '#839C99'
+                                  ],
+                                  hoverOffset: 4
+                                }]
+                            },
+                            options: {
+                                plugins: {
+                                    legend: false,
+                                    title:{
+                                        display: true,
+                                        text: "Station vs. Downtime",
+                                        fullsize: true
+                                    }
+                                }
+                            }
+                        })
+
+
+
                         $('#data').DataTable( { 
-                            "aaData": data,
+                            "aaData": res,
                             "aoColumns": [
-                                {"title": "column1"},
-                                {"title": "column2"},
-                                {"title": "column3"},
-                                {"title": "column1"},
-                                {"title": "column2"},
-                                {"title": "column3"},
-                                {"title": "column1"},
-                                {"title": "column2"},
-                                {"title": "column3"},
-                                {"title": "soemotiej"}
+                                {"title": "Location"},
+                                {"title": "Issue"},
+                                {"title": "Downtime (s)"},
+                                {"title": "Root Cause"},
+                                {"title": "Reason"},
+                                {"title": "Corrective Action"},
+                                {"title":  "Owner"},
+                                {"title": "Shift"},
+                                {"title": "Date"},
+                                {"title": "Time"}
                                 ]
                         }); 
                     });
