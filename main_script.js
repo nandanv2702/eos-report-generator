@@ -256,9 +256,6 @@ async function readSheet(worksheet){
 
                     return elem;
                 });
-                // let new_row = cleaned_row.filter(elem => {
-                //     return elem !== undefined
-                // });
 
                let new_row = cleaned_row.map(elem => {
                    try {
@@ -291,17 +288,12 @@ function saveFile(data){
 };
 
 function cleanNumber(number){
-    let invalid = [null, undefined, "-", "N/A"]
+    let cleaned_num = parseInt(number, 10);
 
-    if(invalid.includes(number)){
-        number = 0
-    } else if(number instanceof String){
-        try {
-            number = parseInt(number)
-        } catch {
-            number = 0
-        }
-    }
-
-    return number;
+    if(Number.isNaN(cleaned_num)){
+        console.log(`ISNAN ============= ${number}`);
+        return 0;
+    };
+    
+    return cleaned_num;
 }
