@@ -166,7 +166,8 @@ var interval = setInterval(function() {
                                 {"title": "Shift"},
                                 {"title": "Date"},
                                 {"title": "Time"}
-                                ]
+                                ],
+                                order: [[2, 'desc']]
                         }); 
 
                         dataTableSet = true
@@ -291,7 +292,6 @@ function cleanNumber(number){
     let cleaned_num = parseInt(number, 10);
 
     if(Number.isNaN(cleaned_num)){
-        console.log(`ISNAN ============= ${number}`);
         return 0;
     };
     
