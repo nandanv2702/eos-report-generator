@@ -224,7 +224,7 @@ async function readSheet(worksheet){
             let start_idx;
 
             formatted_data.some((elem, index) => {
-                if(elem == "AGC ISSUES"){
+                if(elem[0] == "AGC ISSUES"){
                     start_idx = index + 2
                 };
             });
