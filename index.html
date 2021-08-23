@@ -7,7 +7,7 @@
         <!-- jquery, xlsx package, script attachment -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-        <script src="./main_script.js"></script>
+        <script src="./script.js"></script>
         <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
         <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
 
@@ -61,11 +61,13 @@
             
         </div>
         
-        <div>
-            <div style="width: 600px; align-content: center;" id="chart_holder" class="mx-auto">
-
-                <canvas id="myChart" ></canvas>
+        <div class="container">
+            <div class="row p-3">
+                <div style="align-content: center;" id="chart_holder" class="mx-auto col w-25">
+                    <canvas id="myChart" ></canvas>
+                </div>
             </div>
+            
 
             <div class="mx-auto px-md-5 py-md-5">
                 <div class="py-md-10 ">
