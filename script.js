@@ -25,6 +25,7 @@ var interval = setInterval(function () {
 
             handleFiles(e)
                 .then(res => {
+                    document.getElementById("loading").style.display = 'flex'
                     Promise.all(res).then(data => {
                         const sheet_results = [];
 
@@ -145,7 +146,12 @@ var interval = setInterval(function () {
                                     Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time
                                 }))
 
-                                pivotTableRes.map(row => areaMapper(row))
+                                pivotTableRes.map(row => {
+                                    areaMapper(row)
+                                    row['Issue'].trim()
+                                    row['Reason'].trim()
+                                    row['RootCause'].trim()
+                                })
 
                                 google.charts.load('current', { 'packages': ["corechart", "charteditor"] });
 
@@ -167,8 +173,8 @@ var interval = setInterval(function () {
                                         rendererOptions: {
                                             gchart: {
                                                 legend: {
-                                                    position: 'right', 
-                                                    alignment: 'center', 
+                                                    position: 'right',
+                                                    alignment: 'center',
                                                     textStyle: {
                                                         fontSize: 10
                                                     }
@@ -180,6 +186,9 @@ var interval = setInterval(function () {
                                         }
 
                                     });
+
+                                    document.getElementById("loading").style.display = 'none'
+
                                 }
 
                             });
