@@ -158,9 +158,19 @@ var interval = setInterval(function () {
 
                                     $("#output").pivotUI(pivotTableRes, {
                                         renderers: renderers,
-                                        cols: ["Location"], rows: ["Issue"],
+                                        cols: ["Leg Name"], 
+                                        rows: ["Issue"],
+                                        rowOrder: "value_a_to_z",
+                                        colOrder: "value_z_to_a",
                                         aggregatorName: "Sum",
                                         rendererName: "Stacked Bar Chart",
+                                        rendererOptions: {
+                                            gchart: {
+                                                legend: {position: 'right', maxLines: 3},
+                                                isStacked: 'percent'
+                                            }
+                                        }
+                                        
                                     });
                                 }
 
@@ -548,7 +558,7 @@ function areaMapper(row) {
         "VINLOAD": "VIN",
         "BFA1": "Final Assembly",
         "VIN OAD": "VIN",
-        "H04": "h-leg",
+        "H04": "H-leg",
         "L2 LOAD": "LOAD LANE",
         "RA2": "RA",
         "XF04": "F-Leg",
