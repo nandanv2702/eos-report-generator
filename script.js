@@ -158,7 +158,7 @@ var interval = setInterval(function () {
 
                                     $("#output").pivotUI(pivotTableRes, {
                                         renderers: renderers,
-                                        cols: ["Leg Name"], 
+                                        cols: ["Leg Name"],
                                         rows: ["Issue"],
                                         rowOrder: "value_a_to_z",
                                         colOrder: "value_z_to_a",
@@ -166,11 +166,19 @@ var interval = setInterval(function () {
                                         rendererName: "Stacked Bar Chart",
                                         rendererOptions: {
                                             gchart: {
-                                                legend: {position: 'right', maxLines: 3},
-                                                isStacked: 'percent'
+                                                legend: {
+                                                    position: 'right', 
+                                                    alignment: 'center', 
+                                                    textStyle: {
+                                                        fontSize: 10
+                                                    }
+                                                },
+                                                bar: {
+                                                    groupWidth: '75%'
+                                                },
                                             }
                                         }
-                                        
+
                                     });
                                 }
 

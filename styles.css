@@ -1,6 +1,7 @@
-.output {
-    border: 2px black;
-    border-radius: 5px;
+#outputarea {
+    padding: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 table.pvtTable {
@@ -12,6 +13,7 @@ table.pvtTable {
 table.pvtTable tr th, table.pvtTable tr th {
     background-color: #e6EEEE;
     border: 1px solid #CDCDCD;
+    border-radius: 50px;
     font-size: 8pt;
     padding: 5px;
 }
@@ -90,3 +92,9 @@ table.pvtTable tr td {
     max-height: 200px;
 }
 .pvtCheckContainer p{ margin: 5px; }
+
+.pvtRendererArea {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
