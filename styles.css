@@ -72,7 +72,7 @@ table.pvtTable tr td {
 
 .pvtFilteredAttribute { font-style: italic }
 
-.pvtFilterBox{
+.pvtFilterBox {
     z-index: 100;
     width: 280px;
     border: 1px solid gray;
@@ -83,9 +83,11 @@ table.pvtTable tr td {
     margin: 5px;
     position: fixed;
     text-align: center;
+    background-color: rgba(255, 255, 255, .15);  
+    backdrop-filter: blur(5px);
 }
 
-.pvtFilterBox h4{ margin:0; }
+.pvtFilterBox h4, .pvtFilterBox p, .pvtFilterBox button { margin: 5px; padding: 5px; border-radius: 5px;}
 
 .pvtCheckContainer{
     text-align: left;
