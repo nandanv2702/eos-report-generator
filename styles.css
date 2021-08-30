@@ -13,7 +13,6 @@ table.pvtTable {
 table.pvtTable tr th, table.pvtTable tr th {
     background-color: #e6EEEE;
     border: 1px solid #CDCDCD;
-    border-radius: 50px;
     font-size: 8pt;
     padding: 5px;
 }
