@@ -100,81 +100,17 @@ var interval = setInterval(function () {
 
                                 // get percentage downtime for each of the top 8 legs
                                 let percentages = final_render
-                                        .map(val => { 
-                                            return ((parseInt(val[1]) / parseInt(total_downtime) * 100).toString().slice(0, 4) + "%") 
-                                        })
+                                    .map(val => {
+                                        return ((parseInt(val[1]) / parseInt(total_downtime) * 100).toString().slice(0, 4) + "%")
+                                    })
 
-                                document.getElementById("myChart").remove();
-                                let canvas = document.createElement("canvas");
-                                canvas.setAttribute("id", "myChart");
-                                document.querySelector("#chart_holder").appendChild(canvas);
+                                // deletes old chart (if exists)
+                                deleteChart()
 
-                                let ctx = document.getElementById("myChart");
+                                // creates new chart from data
+                                createChart(final_render, percentages)
 
-                                chart = new Chart(ctx, {
-                                    type: 'bar',
-                                    data: {
-                                        labels: final_render.map(loc => loc[0]),
-                                        datasets: [{
-                                            data: final_render.map(loc => loc[1]),
-                                            backgroundColor: [
-                                                '#DCD106',
-                                                '#D1DA9F',
-                                                '#E35184',
-                                                '#FAD7FF',
-                                                '#6ECC49',
-                                                '#ED2B34',
-                                                '#D1DA9F',
-                                                '#839C99'
-                                            ],
-                                            hoverOffset: 4,
-                                        }]
-                                    },
-                                    options: {
-                                        plugins: {
-                                            legend: false,
-                                            title: {
-                                                display: true,
-                                                text: "Station vs. Downtime (s)",
-                                                fullsize: true
-                                            },
-                                        },
-                                        scales: {
-                                            y: {
-                                                title: {
-                                                    display: true,
-                                                    text: "Downtime (s)",
-                                                    fullsize: true
-                                                }
-                                            },
-                                            x: {
-                                                title: {
-                                                    display: true,
-                                                    text: "Station",
-                                                    fullsize: true
-                                                }
-                                            }
-                                        },
-                                        hover: {
-                                            animationDuration: 1
-                                        },
-                                        animation: {
-                                            onComplete: () => {
-                                                let chartInstance = this.chart, 
-                                                ctx = chartInstance.ctx;
-                                                ctx.textAlign = 'center';
-                                                ctx.textBaseline = 'bottom';
-
-                                                chartInstance.data.datasets.forEach(function (dataset, i) {
-                                                    let meta = chartInstance.getDatasetMeta(i)
-                                                    meta.data.forEach(function (bar, index) {
-                                                        ctx.fillText(percentages[index], bar.x, bar.y - 5);
-                                                    });
-                                                });
-                                            }
-                                        }
-                                    },
-                                });
+                                console.log(`FINAL DATASET IS \n ${JSON.stringify(res)}`)
 
                                 if (dataTableSet) {
                                     $("#data").dataTable().fnDestroy()
@@ -198,8 +134,33 @@ var interval = setInterval(function () {
                                 });
 
                                 dataTableSet = true
-                            });
 
+                                const pivotTableRes = res.map((
+                                    [Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time]
+                                ) => ({
+                                    Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time
+                                }))
+
+                                google.charts.load('current', { 'packages': ["corechart", "charteditor"] });
+
+                                google.charts.setOnLoadCallback(drawChart);
+
+                                function drawChart(){
+                                    var derivers = $.pivotUtilities.derivers;
+                                    var renderers = $.extend($.pivotUtilities.renderers,
+                                        $.pivotUtilities.gchart_renderers);
+    
+                                    console.log(renderers)
+    
+                                    $("#output").pivotUI(pivotTableRes, {
+                                        renderers: renderers,
+                                        cols: ["Location"], rows: ["Issue"],
+                                        aggregatorName: "Sum",
+                                        rendererName: "Stacked Bar Chart",
+                                    });
+                                }
+
+                            });
                     });
                 });
 
@@ -323,4 +284,82 @@ function cleanNumber(number) {
     };
 
     return cleaned_num;
+}
+
+function deleteChart() {
+    document.getElementById("myChart").remove();
+}
+
+function createChart(final_render, percentages) {
+    let canvas = document.createElement("canvas");
+    canvas.setAttribute("id", "myChart");
+    document.querySelector("#chart_holder").appendChild(canvas);
+
+    let ctx = document.getElementById("myChart");
+
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: final_render.map(loc => loc[0]),
+            datasets: [{
+                data: final_render.map(loc => loc[1]),
+                backgroundColor: [
+                    '#DCD106',
+                    '#D1DA9F',
+                    '#E35184',
+                    '#FAD7FF',
+                    '#6ECC49',
+                    '#ED2B34',
+                    '#D1DA9F',
+                    '#839C99'
+                ],
+                hoverOffset: 4,
+            }]
+        },
+        options: {
+            plugins: {
+                legend: false,
+                title: {
+                    display: true,
+                    text: "Station vs. Downtime (s)",
+                    fullsize: true
+                },
+            },
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: "Downtime (s)",
+                        fullsize: true
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: "Station",
+                        fullsize: true
+                    }
+                }
+            },
+            hover: {
+                animationDuration: 1
+            },
+            animation: {
+                onComplete: () => {
+                    let chartInstance = this.chart,
+                        ctx = chartInstance.ctx;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+
+                    chartInstance.data.datasets.forEach(function (dataset, i) {
+                        let meta = chartInstance.getDatasetMeta(i)
+                        meta.data.forEach(function (bar, index) {
+                            ctx.fillText(percentages[index], bar.x, bar.y - 5);
+                        });
+                    });
+                }
+            }
+        },
+    });
+
 }

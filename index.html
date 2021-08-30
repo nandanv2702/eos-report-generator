@@ -6,16 +6,23 @@
 
         <!-- jquery, xlsx package, script attachment -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-        <script src="./script.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>        <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
         <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
         <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.min.js"></script>
+        <script type="text/javascript" src="./gchart_renderers.js"></script>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <link rel="stylesheet" href="styles.css">
+
+
 
         <!-- chart js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <!-- bootstrap -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="./script.js"></script>
+    
     </head>
 
     <body>
@@ -63,10 +70,10 @@
         
         <div class="container">
             <div class="row p-3">
-                <div style="align-content: center;" id="chart_holder" class="mx-auto col w-25">
+                <div style="align-content: center;" id="chart_holder" class="mx-auto col">
                     <canvas id="myChart" ></canvas>
                 </div>
-                <div style="align-content: center;" class="mx-auto col w-25">
+                <div style="align-content: center;" class="mx-auto col">
                     <h3>
                         Note
                     </h3>
@@ -88,7 +95,12 @@
     
                 </table>
             </div>
+
+            <div id="output" class="m-5">
+
+            </div>
             
         </div>
+
     </body>
 </html>
