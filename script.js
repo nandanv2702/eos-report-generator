@@ -157,45 +157,31 @@ var interval = setInterval(function () {
                                     delete row['Downtime'];
                                 })
 
+                                console.log();
 
+                                var derivers = $.pivotUtilities.derivers;
+                                var renderers = $.extend($.pivotUtilities.renderers,
+                                    $.pivotUtilities.c3_renderers);
 
-                                google.charts.load('current', { 'packages': ["corechart", "charteditor"] });
-
-                                google.charts.setOnLoadCallback(drawChart);
-
-                                function drawChart() {
-                                    var derivers = $.pivotUtilities.derivers;
-                                    var renderers = $.extend($.pivotUtilities.renderers,
-                                        $.pivotUtilities.gchart_renderers);
-
-                                    $("#output").pivotUI(pivotTableRes, {
-                                        renderers: renderers,
-                                        cols: ["Leg Name"],
-                                        rows: ["Issue"],
-                                        rowOrder: "value_a_to_z",
-                                        colOrder: "value_z_to_a",
-                                        aggregatorName: "Sum",
-                                        rendererName: "Stacked Bar Chart",
-                                        rendererOptions: {
-                                            gchart: {
-                                                legend: {
-                                                    position: 'right',
-                                                    alignment: 'center',
-                                                    textStyle: {
-                                                        fontSize: 10
-                                                    }
-                                                },
-                                                bar: {
-                                                    groupWidth: '75%'
-                                                },
+                                $("#output").pivotUI(pivotTableRes, {
+                                    renderers: renderers,
+                                    cols: ["Leg Name"],
+                                    rows: ["Issue"],
+                                    rowOrder: "value_a_to_z",
+                                    colOrder: "value_z_to_a",
+                                    aggregatorName: "Sum",
+                                    rendererName: "Stacked Bar Chart",
+                                    rendererOptions: {
+                                        c3: {
+                                            tooltip: {
+                                                show: true
                                             }
                                         }
+                                    }
 
-                                    });
+                                });
 
-                                    document.getElementById("loading").style.display = 'none'
-
-                                }
+                                document.getElementById("loading").style.display = 'none'
 
                             });
                     });

@@ -1,119 +1,136 @@
 <html>
-    <head>
-        <title>
-            EOS Report Generator
-        </title>
 
-        <!-- jquery, xlsx package, script attachment -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>        <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-        <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.min.js"></script>
-        <script type="text/javascript" src="./gchart_renderers.js"></script>
-        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-        <link rel="stylesheet" href="styles.css">
+<head>
+    <title>
+        EOS Report Generator
+    </title>
+
+    <!-- jquery, xlsx package, script attachment -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.20/c3.min.js"
+        integrity="sha512-05OyXnwpqz/1KqqNML6nuS/yEc/3m9mC2ge93iH9yamv9ZBU6hGi6VLrdypN8sgOTLEil4cE/b7rHKZZQItg8A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="./c3_renderers.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
 
 
 
-        <!-- chart js -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- chart js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <!-- bootstrap -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <script src="./script.js"></script>
-    
-    </head>
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="./script.js"></script>
 
-    <body>
-        <div id="loading" style="display: none;">
-            <div class="loader">
+</head>
 
-            </div>
+<body>
+    <div id="loading" style="display: none;">
+        <div class="loader">
+
         </div>
-        <div class="jumbotron">
-            <h1 class="display-4">EOS Report Generator</h1>
-            <p class="lead">
-                Welcome! This tool can help you analyze EOS reports to help determine which stations have the highest downtime in any given time period. Here's how you use the webpage:
-                <ul>
-                    <li>
-                        Go to the <a href="https://hdi365.sharepoint.com/sites/NFYAssm/Assembly%20Engineering/Forms/AllItems.aspx?viewid=59db12d8%2Dcd34%2D43e1%2D9b85%2Df977e583f8c9&id=%2Fsites%2FNFYAssm%2FAssembly%20Engineering%2FTactical%20Engineering%2FEOS%20Reports%2F2021">EOS Reports SharePoint Folder</a> and download all .xlsx files you want to analyze
-                    </li>
-                    <li>
-                        Use the form below to upload your files
-                    </li>
-                    <li>
-                        Once a results table appears, you can filter through it to gain more insight into the data
-                    </li>
-                </ul>
-                <p>
-                    Please note that:
-                    <br>
-                    (i) no data is sent to any server => all calculations happen on your local machine.
-                    <br>
-                    (ii) in some cases where a lot of Excel files are uploaded, the web page might freeze. This is completely normal and your data will be rendered ASAP.
-                </p>
-            </p>
-            <div class="form-group">
+    </div>
+    <div class="jumbotron">
+        <h1 class="display-4">EOS Report Generator</h1>
+        <p class="lead">
+            Welcome! This tool can help you analyze EOS reports to help determine which stations have the highest
+            downtime in any given time period. Here's how you use the webpage:
+        <ul>
+            <li>
+                Go to the <a
+                    href="https://hdi365.sharepoint.com/sites/NFYAssm/Assembly%20Engineering/Forms/AllItems.aspx?viewid=59db12d8%2Dcd34%2D43e1%2D9b85%2Df977e583f8c9&id=%2Fsites%2FNFYAssm%2FAssembly%20Engineering%2FTactical%20Engineering%2FEOS%20Reports%2F2021">EOS
+                    Reports SharePoint Folder</a> and download all .xlsx files you want to analyze
+            </li>
+            <li>
+                Use the form below to upload your files
+            </li>
+            <li>
+                Once a results table appears, you can filter through it to gain more insight into the data
+            </li>
+        </ul>
+        <p>
+            Please note that:
+            <br>
+            (i) no data is sent to any server => all calculations happen on your local machine.
+            <br>
+            (ii) in some cases where a lot of Excel files are uploaded, the web page might freeze. This is completely
+            normal and your data will be rendered ASAP.
+        </p>
+        </p>
+        <div class="form-group">
 
-                <form action="" id="file_uploader">
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
-                        </div>
-                        <div class="custom-file">
-                          <input type="file" class="custom-file-input" id="files" aria-describedby="inputGroupFileAddon01" accept=".xlsx" multiple>
-                          <label class="custom-file-label" for="files">Choose file</label>
-                        </div>
+            <form action="" id="file_uploader">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
                     </div>
-                </form>
-            </div>
-          </div>
-        <div>
-            
-        </div>
-        
-        <div class="container">
-            <div class="row p-3">
-                <div style="align-content: center;" id="chart_holder" class="mx-auto col">
-                    <canvas id="myChart" ></canvas>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="files" aria-describedby="inputGroupFileAddon01"
+                            accept=".xlsx" multiple>
+                        <label class="custom-file-label" for="files">Choose file</label>
+                    </div>
                 </div>
-                <div style="align-content: center;" class="mx-auto col">
-                    <h3>
-                        Note
-                    </h3>
-                    <p>
-                        Once a bar chart is shown to the left, the percentages above each bar denote the downtime for that station as percentage of the total downtime
-                    </p>
-                </div>
-            </div>
-            
-
-            <div class="mx-auto px-md-5 py-md-5">
-                <div class="py-md-10 ">
-                    <button class="btn btn-outline-primary float-right" type="button" id="download_xlsx" style="display: none;">Download Raw Data</button>
-                </div>
-            </div>
-            
+            </form>
         </div>
+    </div>
+    <div>
 
-        <div id="outputarea">
-            <div id="output" class="m-5">
+    </div>
 
+    <div class="container">
+        <div class="row p-3">
+            <div style="align-content: center;" id="chart_holder" class="mx-auto col">
+                <canvas id="myChart"></canvas>
             </div>
-        </div>
-
-        <div class="container">
-            <div class="mx-auto justify-content-center px-md-5 py-md-5">
-                <table id="data">
-    
-                </table>
+            <div style="align-content: center;" class="mx-auto col">
+                <h3>
+                    Note
+                </h3>
+                <p>
+                    Once a bar chart is shown to the left, the percentages above each bar denote the downtime for that
+                    station as percentage of the total downtime
+                </p>
             </div>
         </div>
 
 
-        
+        <div class="mx-auto px-md-5 py-md-5">
+            <div class="py-md-10 ">
+                <button class="btn btn-outline-primary float-right" type="button" id="download_xlsx"
+                    style="display: none;">Download Raw Data</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="outputarea">
+        <div id="output" class="m-5">
+
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="mx-auto justify-content-center px-md-5 py-md-5">
+            <table id="data">
+
+            </table>
+        </div>
+    </div>
 
 
-    </body>
+
+
+
+</body>
+
 </html>
