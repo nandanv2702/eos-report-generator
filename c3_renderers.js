@@ -165,11 +165,11 @@
           axis: {
             rotated: chartOpts.horizontal,
             y: {
-              label: vAxisTitle,
+              label: { text: vAxisTitle, position: 'outer-center' },
               tick: {}
             },
             x: {
-              label: hAxisTitle,
+              label: { text: hAxisTitle, position: 'outer-center' },
               tick: {
                 rotate: rotationAngle,
                 multiline: false

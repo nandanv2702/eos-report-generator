@@ -175,7 +175,7 @@ var interval = setInterval(function () {
                                         c3: {
                                             tooltip: {
                                                 show: true
-                                            }
+                                            },
                                         }
                                     }
 
