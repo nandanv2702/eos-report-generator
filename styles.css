@@ -37,8 +37,8 @@
 
 #outputarea {
     padding: 2px;
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 table.pvtTable {
@@ -92,8 +92,8 @@ table.pvtTable tr td {
 .pvtAxisContainer li span.pvtAttr {
     background: #F3F3F3;
     border: 1px solid #DEDEDE;
-    padding: 2px 5px;
-    white-space:nowrap;
+    padding: 2px 3px;
+    white-space: 'nowrap';
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
