@@ -169,7 +169,7 @@
               tick: {}
             },
             x: {
-              label: { text: hAxisTitle, position: 'outer-center' },
+              label: { text: hAxisTitle, position: 'outer-right' },
               tick: {
                 rotate: rotationAngle,
                 multiline: false
