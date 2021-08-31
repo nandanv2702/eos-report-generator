@@ -151,7 +151,13 @@ var interval = setInterval(function () {
                                     row['Issue'].trim()
                                     row['Reason'].trim()
                                     row['RootCause'].trim()
+
+                                    Object.defineProperty(row, 'Downtime (s)',
+                                        Object.getOwnPropertyDescriptor(row, 'Downtime'));
+                                    delete row['Downtime'];
                                 })
+
+
 
                                 google.charts.load('current', { 'packages': ["corechart", "charteditor"] });
 
