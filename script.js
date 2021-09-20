@@ -62,15 +62,15 @@ var interval = setInterval(function () {
                                     if (idx != 0) {
                                         let keys = Object.keys(sort_by_leg);
 
-                                        if (row[2] === undefined) {
+                                        if (row[3] === undefined) {
                                             console.log(row)
                                         }
 
-                                        if (!keys.includes(row[0])) {
+                                        if (!keys.includes(row[1])) {
                                             console.log('this')
-                                            sort_by_leg[row[0]] = parseInt(row[2])
+                                            sort_by_leg[row[1]] = parseInt(row[3])
                                         } else {
-                                            sort_by_leg[row[0]] = sort_by_leg[row[0]] + parseInt(row[2])
+                                            sort_by_leg[row[1]] = sort_by_leg[row[1]] + parseInt(row[3])
                                         };
                                     };
 
@@ -120,6 +120,7 @@ var interval = setInterval(function () {
                                 $('#data').DataTable({
                                     "aaData": res,
                                     "aoColumns": [
+                                        { "title": "Cart" },
                                         { "title": "Location" },
                                         { "title": "Issue" },
                                         { "title": "Downtime (s)" },
@@ -141,15 +142,16 @@ var interval = setInterval(function () {
                                 console.log(uniqueLocs)
 
                                 const pivotTableRes = res.map((
-                                    [Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time]
+                                    [Cart, Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time]
                                 ) => ({
-                                    Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time
+                                    Cart, Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time
                                 }))
 
                                 const dates = []
 
                                 pivotTableRes.map(row => {
                                     areaMapper(row)
+                                    row['Cart'].trim()
                                     row['Issue'].trim()
                                     row['Reason'].trim()
                                     row['RootCause'].trim()
@@ -256,7 +258,7 @@ async function readSheet(worksheet) {
 
                 console.log(formatted_data[i][2])
 
-                let row = [raw_row[2], raw_row[3], cleanNumber(raw_row[5]), raw_row[6], raw_row[9], raw_row[12], raw_row[14], cleanNumber(raw_row[16]), raw_row[17], cleanNumber(raw_row[18])]
+                let row = [raw_row[0], raw_row[2], raw_row[3], cleanNumber(raw_row[5]), raw_row[6], raw_row[9], raw_row[12], raw_row[14], cleanNumber(raw_row[16]), raw_row[17], cleanNumber(raw_row[18])]
                 let cleaned_row = row.map(elem => {
 
                     if (elem == null || elem == undefined || elem == `empty`) {
@@ -266,7 +268,8 @@ async function readSheet(worksheet) {
                         try {
                             elem = elem.toUpperCase()
                         } catch (error) {
-                            console.log(`element may be a number: ${error}\n${elem}`)
+                            
+                            // console.log(`element may be a number: ${error}\n${elem}`)
                         }
 
                     }
@@ -278,7 +281,7 @@ async function readSheet(worksheet) {
                     try {
                         elem.trim()
                     } catch (err) {
-                        console.log(`may be a number: ${err}\n${elem}\n`)
+                        // console.log(`may be a number: ${err}\n${elem}\n`)
                     }
                     return elem;
                 })
