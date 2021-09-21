@@ -301,6 +301,7 @@ async function readSheet(worksheet) {
 };
 
 function saveFile(data) {
+    data.unshift(["Cart", "Location", "Issue", "Downtime", "RootCause", "Reason", "CorrectiveAction", "Owner", "Shift", "Date", "Time"])
     const book = XLSX.utils.book_new();
     const sheet = XLSX.utils.aoa_to_sheet(data);
     XLSX.utils.book_append_sheet(book, sheet, 'EOS_Compiled_Data');

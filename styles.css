@@ -107,7 +107,7 @@ table.pvtTable tr td {
 .pvtHorizList li { display: inline; }
 .pvtVertList { vertical-align: top; }
 
-.pvtFilteredAttribute { font-style: italic }
+.pvtFilteredAttribute { font-style: italic ; border-radius: 4px; background-color: #CDCDCD; }
 
 .pvtFilterBox {
     z-index: 100;
