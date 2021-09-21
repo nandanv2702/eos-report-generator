@@ -111,6 +111,10 @@ var interval = setInterval(function () {
                                 // creates new chart from data
                                 createChart(final_render, percentages)
 
+                                res.forEach(row => { 
+                                    row[9] = new Date(row[9])
+                                 })
+
                                 console.log(`FINAL DATASET IS \n ${JSON.stringify(res)}`)
 
                                 if (dataTableSet) {
@@ -129,7 +133,14 @@ var interval = setInterval(function () {
                                         { "title": "Corrective Action" },
                                         { "title": "Owner" },
                                         { "title": "Shift" },
-                                        { "title": "Date" },
+                                        { "title": "Date", 
+                                        "type": "date",
+                                        "render": function (value) {
+                           
+                                             var dt = new Date(value);
+                           
+                                             return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();}
+                                       },
                                         { "title": "Time" }
                                     ],
                                     order: [[3, 'desc']]
@@ -137,7 +148,7 @@ var interval = setInterval(function () {
 
                                 dataTableSet = true
 
-                                const uniqueLocs = new Set(res.map(row => row[0]))
+                                const uniqueLocs = new Set(res.map(row => row[1]))
 
                                 console.log(uniqueLocs)
 
@@ -268,7 +279,7 @@ async function readSheet(worksheet) {
                         try {
                             elem = elem.toUpperCase()
                         } catch (error) {
-                            
+
                             // console.log(`element may be a number: ${error}\n${elem}`)
                         }
 
@@ -402,24 +413,24 @@ function getWeek(date, dowOffset = 0) {
     let day = newYear.getDay() - dowOffset; //the day of week the year begins on
     day = (day >= 0 ? day : day + 7);
     const daynum = Math.floor((date.getTime() - newYear.getTime() -
-      (date.getTimezoneOffset() - newYear.getTimezoneOffset()) * 60000) / 86400000) + 1;
+        (date.getTimezoneOffset() - newYear.getTimezoneOffset()) * 60000) / 86400000) + 1;
     //if the year starts before the middle of a week
     if (day < 4) {
-      const weeknum = Math.floor((daynum + day - 1) / 7) + 1;
-      if (weeknum > 52) {
-        const nYear = new Date(date.getFullYear() + 1, 0, 1);
-        let nday = nYear.getDay() - dowOffset;
-        nday = nday >= 0 ? nday : nday + 7;
-        /*if the next year starts before the middle of
-          the week, it is week #1 of that year*/
-        return nday < 4 ? 1 : 53;
-      }
-      return weeknum;
+        const weeknum = Math.floor((daynum + day - 1) / 7) + 1;
+        if (weeknum > 52) {
+            const nYear = new Date(date.getFullYear() + 1, 0, 1);
+            let nday = nYear.getDay() - dowOffset;
+            nday = nday >= 0 ? nday : nday + 7;
+            /*if the next year starts before the middle of
+              the week, it is week #1 of that year*/
+            return nday < 4 ? 1 : 53;
+        }
+        return weeknum;
     }
     else {
-      return Math.floor((daynum + day - 1) / 7);
+        return Math.floor((daynum + day - 1) / 7);
     }
-  }
+}
 
 function areaMapper(row) {
     const mapper = {
