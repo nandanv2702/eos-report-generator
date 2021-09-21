@@ -132,7 +132,7 @@ var interval = setInterval(function () {
                                         { "title": "Date" },
                                         { "title": "Time" }
                                     ],
-                                    order: [[2, 'desc']]
+                                    order: [[3, 'desc']]
                                 });
 
                                 dataTableSet = true
