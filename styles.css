@@ -39,6 +39,7 @@
     padding: 2px;
     margin-left: 2px;
     margin-right: 2px;
+    width: 100vw;
 }
 
 table.pvtTable {
@@ -111,7 +112,10 @@ table.pvtTable tr td {
 
 .pvtFilterBox {
     z-index: 100;
+    min-height: 5rem;
     width: 280px;
+    bottom: 25px;
+    overflow-y: scroll;
     border: 1px solid gray;
     background-color: #fff;
     border-radius: 10px;
@@ -138,6 +142,7 @@ table.pvtTable tr td {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-right: 2px;
 }
 
 .c3-axis-x-label, .c3-axis-y-label {
