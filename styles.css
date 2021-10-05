@@ -115,6 +115,7 @@ table.pvtTable tr td {
     min-height: 5rem;
     width: 280px;
     bottom: 25px;
+    top: auto !important;
     overflow-y: scroll;
     border: 1px solid gray;
     background-color: #fff;
