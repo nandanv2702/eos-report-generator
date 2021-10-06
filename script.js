@@ -1,19 +1,13 @@
-// Requirements:
-
-// when multiple files are submitted, call a function that returns an array of Promises with the whole file 
-
-// then, once all thoes Promises are resolved, for each workbook get the sheet data and push it into a new array
-
-// send the new array to the viewer
+'use strict';
 
 let dataTableSet = false;
-let global_res = [];
+let global_result = [];
 
 var interval = setInterval(function () {
     if (document.readyState === 'complete') {
 
         document.getElementById("download_xlsx").addEventListener("click", () => {
-            saveFile(global_res)
+            saveFile(global_result)
         })
 
         document.getElementById("files").addEventListener("change", e => {
@@ -47,13 +41,13 @@ var interval = setInterval(function () {
                             .then(res => {
                                 let compiled_results = [];
 
-                                res.map(sheet_entry => compiled_results.push(...sheet_entry));
+                                res.map(sheet_entry => compiled_results.push(...sheet_entry.downtimeEntries));
 
                                 return compiled_results
 
                             })
                             .then(res => {
-                                global_res = res;
+                                global_result = res;
                                 const sort_by_leg = {}
 
 
@@ -240,75 +234,123 @@ async function handleFiles(e) {
 
 };
 
+function findStarterElements(formatted_data, searchText) {
+    let startIndexArray = []
+    formatted_data.filter((elem, index) => {
+        if (elem[0] === searchText.toString()) {
+            startIndexArray.push([index, ...elem])
+        }
+    })
+    return startIndexArray
+}
+
+async function readDowntimeEntries(formatted_data, startIndexArray) {
+    const sheet_rows = []
+
+    let start_idx = startIndexArray[1][0] + 2
+
+    console.log(`start index is ${start_idx}`);
+
+    for (let i = start_idx; i < formatted_data.length; i++) {
+        if (formatted_data[i][2] === null || formatted_data[i][2] === undefined) {
+            break;
+        };
+
+        let raw_row = formatted_data[i]
+
+        console.log(formatted_data[i][2])
+
+        let row = [raw_row[0], raw_row[2], raw_row[3], cleanNumber(raw_row[5]), raw_row[6], raw_row[9], raw_row[12], raw_row[14], cleanNumber(raw_row[16]), raw_row[17], cleanNumber(raw_row[18])]
+        let cleaned_row = row.map(elem => {
+
+            if (elem === null || elem === undefined || elem == `empty`) {
+                elem = "N/A"
+
+            } else {
+                try {
+                    elem = elem.toUpperCase().trim()
+                } catch (error) {
+
+                    // console.log(`element may be a number: ${error}\n${elem}`)
+                }
+
+            }
+
+            return elem;
+        });
+
+        if (cleaned_row.length !== 0) {
+            sheet_rows.push(cleaned_row)
+        };
+
+    };
+
+    return sheet_rows
+}
+
+async function readCartIssues(formatted_data, startIndexArray) {
+    const sheet_rows = []
+
+    let start_idx = startIndexArray[0][0] + 2
+
+    console.log(`start index is ${start_idx}`);
+
+    for (let i = start_idx; i < formatted_data.length; i++) {
+        if (formatted_data[i][0] === null || formatted_data[i][0] === undefined) {
+            break;
+        };
+
+        let raw_row = formatted_data[i]
+
+        let row = [raw_row[0], raw_row[3], raw_row[17]]
+        let cleaned_row = row.map(elem => {
+
+            if (elem === null || elem === undefined || elem == `empty`) {
+                elem = "N/A"
+
+            } else {
+                try {
+                    elem = elem.toUpperCase().trim()
+                } catch (error) {
+
+                    // console.log(`element may be a number: ${error}\n${elem}`)
+                }
+
+            }
+
+            return elem;
+        });
+
+        if (cleaned_row.length !== 0) {
+            sheet_rows.push(cleaned_row)
+            console.log(cleaned_row);
+        };
+    }
+
+    return sheet_rows
+}
+
 async function readSheet(worksheet) {
-    const promise = new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
 
         try {
-            const sheet_rows = [];
+            const sheet_rows = {};
 
             console.log('readaing sheet');
 
             let formatted_data = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
 
-            let start_idx;
+            const startIndexArray = findStarterElements(formatted_data, "AGC ISSUES")
 
-            formatted_data.some((elem, index) => {
-                if (elem[0] == "AGC ISSUES") {
-                    start_idx = index + 2
-                };
-            });
+            sheet_rows.downtimeEntries = await readDowntimeEntries(formatted_data, startIndexArray)
+            sheet_rows.cartIssues = await readCartIssues(formatted_data, startIndexArray)
 
-            console.log(`start index is ${start_idx}`);
-
-            for (i = start_idx; i < formatted_data.length; i++) {
-                if (formatted_data[i][2] === null || formatted_data[i][2] === undefined) {
-                    break;
-                };
-
-                let raw_row = formatted_data[i]
-
-                console.log(formatted_data[i][2])
-
-                let row = [raw_row[0], raw_row[2], raw_row[3], cleanNumber(raw_row[5]), raw_row[6], raw_row[9], raw_row[12], raw_row[14], cleanNumber(raw_row[16]), raw_row[17], cleanNumber(raw_row[18])]
-                let cleaned_row = row.map(elem => {
-
-                    if (elem == null || elem == undefined || elem == `empty`) {
-                        elem = "N/A"
-
-                    } else {
-                        try {
-                            elem = elem.toUpperCase()
-                        } catch (error) {
-
-                            // console.log(`element may be a number: ${error}\n${elem}`)
-                        }
-
-                    }
-
-                    return elem;
-                });
-
-                let new_row = cleaned_row.map(elem => {
-                    try {
-                        elem.trim()
-                    } catch (err) {
-                        // console.log(`may be a number: ${err}\n${elem}\n`)
-                    }
-                    return elem;
-                })
-
-                if (new_row.length !== 0) {
-                    sheet_rows.push(new_row)
-                };
-
-            };
 
             resolve(sheet_rows);
         } catch (error) {
             reject(error)
         }
     });
-    return promise;
 };
 
 function saveFile(data) {
@@ -340,7 +382,7 @@ function createChart(final_render, percentages) {
 
     let ctx = document.getElementById("myChart");
 
-    chart = new Chart(ctx, {
+    let chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: final_render.map(loc => loc[0]),
@@ -389,7 +431,7 @@ function createChart(final_render, percentages) {
             },
             animation: {
                 onComplete: () => {
-                    let chartInstance = this.chart,
+                    let chartInstance = chart,
                         ctx = chartInstance.ctx;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
