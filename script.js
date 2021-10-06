@@ -1,203 +1,205 @@
 'use strict';
 
 let dataTableSet = false;
-let global_result = [];
+let global_downtime_result = [];
 
 var interval = setInterval(function () {
     if (document.readyState === 'complete') {
 
+        clearInterval(this)
+
         document.getElementById("download_xlsx").addEventListener("click", () => {
-            saveFile(global_result)
+            console.log(global_downtime_result)
+            saveFile(global_downtime_result)
         })
 
-        document.getElementById("files").addEventListener("change", e => {
+        document.getElementById("files").addEventListener("change", async (e) => {
 
             document.getElementById("download_xlsx").style.display = ""
 
             // destroy datatable
             document.getElementById("data").innerHTML = ""
 
-            handleFiles(e)
-                .then(res => {
-                    document.getElementById("loading").style.display = 'flex'
-                    Promise.all(res).then(data => {
-                        const sheet_results = [];
+            const res = await handleFiles(e)
+            document.getElementById("loading").style.display = 'flex'
+            Promise.all(res).then(data => {
+                const sheet_results = [];
 
-                        data.forEach(workbook => {
-                            let sheets = workbook.SheetNames;
+                data.forEach(workbook => {
+                    let sheets = workbook.SheetNames;
 
-                            console.log(`there are ${sheets.length} sheets`)
+                    console.log(`there are ${sheets.length} sheets`)
 
-                            sheets.map(sheet => {
-                                if (sheet.toLowerCase() !== "template") {
-                                    sheet_results.push(readSheet(workbook.Sheets[sheet]))
-                                }
+                    sheets.map(sheet => {
+                        if (sheet.toLowerCase() !== "template") {
+                            sheet_results.push(readSheet(workbook.Sheets[sheet]))
+                        }
 
-                                console.log(`sheetname is ${sheet}`)
-                            });
-                        });
-
-                        Promise.all(sheet_results)
-                            .then(res => {
-                                let compiled_results = [];
-
-                                res.map(sheet_entry => compiled_results.push(...sheet_entry.downtimeEntries));
-
-                                return compiled_results
-
-                            })
-                            .then(res => {
-                                global_result = res;
-                                const sort_by_leg = {}
-
-
-                                console.log(res);
-                                res.map((row, idx) => {
-                                    if (idx != 0) {
-                                        let keys = Object.keys(sort_by_leg);
-
-                                        if (row[3] === undefined) {
-                                            console.log(row)
-                                        }
-
-                                        if (!keys.includes(row[1])) {
-                                            console.log('this')
-                                            sort_by_leg[row[1]] = parseInt(row[3])
-                                        } else {
-                                            sort_by_leg[row[1]] = sort_by_leg[row[1]] + parseInt(row[3])
-                                        };
-                                    };
-
-
-                                });
-
-                                // sort station by highest downtime and render top 8 in pie chart
-                                // Create items array
-                                var items = Object.keys(sort_by_leg).map(function (key) {
-                                    return [key, sort_by_leg[key]];
-                                });
-
-                                // Sort the array based on the second element
-                                items.sort(function (first, second) {
-                                    return second[1] - first[1];
-                                });
-
-
-                                // Create a new array with only the first 8 items
-                                console.log(items.slice(0, 8));
-
-                                let final_render = items.slice(0, 8);
-
-                                // Calculate total downtime
-                                let total_downtime = items.reduce((prevVal, currVal) => {
-                                    return prevVal + parseInt(currVal[1])
-                                }, 0)
-
-                                // get percentage downtime for each of the top 8 legs
-                                let percentages = final_render
-                                    .map(val => {
-                                        return ((parseInt(val[1]) / parseInt(total_downtime) * 100).toString().slice(0, 4) + "%")
-                                    })
-
-                                // deletes old chart (if exists)
-                                deleteChart()
-
-                                // creates new chart from data
-                                createChart(final_render, percentages)
-
-                                res.forEach(row => { 
-                                    row[9] = new Date(row[9])
-                                 })
-
-                                console.log(`FINAL DATASET IS \n ${JSON.stringify(res)}`)
-
-                                if (dataTableSet) {
-                                    $("#data").dataTable().fnDestroy()
-                                };
-
-                                $('#data').DataTable({
-                                    "aaData": res,
-                                    "aoColumns": [
-                                        { "title": "Cart" },
-                                        { "title": "Location" },
-                                        { "title": "Issue" },
-                                        { "title": "Downtime (s)" },
-                                        { "title": "Root Cause" },
-                                        { "title": "Reason" },
-                                        { "title": "Corrective Action" },
-                                        { "title": "Owner" },
-                                        { "title": "Shift" },
-                                        { "title": "Date", 
-                                        "type": "date",
-                                        "render": function (value) {
-                           
-                                             var dt = new Date(value);
-                           
-                                             return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();}
-                                       },
-                                        { "title": "Time" }
-                                    ],
-                                    order: [[3, 'desc']]
-                                });
-
-                                dataTableSet = true
-
-                                const uniqueLocs = new Set(res.map(row => row[1]))
-
-                                console.log(uniqueLocs)
-
-                                const pivotTableRes = res.map((
-                                    [Cart, Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time]
-                                ) => ({
-                                    Cart, Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time
-                                }))
-
-                                const dates = []
-
-                                pivotTableRes.map(row => {
-                                    areaMapper(row)
-                                    row['Cart'].trim()
-                                    row['Issue'].trim()
-                                    row['Reason'].trim()
-                                    row['RootCause'].trim()
-
-                                    Object.defineProperty(row, 'Downtime (s)',
-                                        Object.getOwnPropertyDescriptor(row, 'Downtime'));
-                                    delete row['Downtime'];
-
-                                    row['Week'] = getWeek(new Date(row['Date']))
-                                })
-
-                                console.log(`dates are ${JSON.stringify(dates)}`);
-
-                                var derivers = $.pivotUtilities.derivers;
-                                var renderers = $.extend($.pivotUtilities.renderers,
-                                    $.pivotUtilities.c3_renderers);
-
-                                $("#output").pivotUI(pivotTableRes, {
-                                    renderers: renderers,
-                                    cols: ["Leg Name"],
-                                    rows: ["Issue"],
-                                    rowOrder: "value_a_to_z",
-                                    colOrder: "value_z_to_a",
-                                    aggregatorName: "Sum",
-                                    hiddenAttributes: ["Time"],
-                                    rendererName: "Stacked Bar Chart",
-                                    rendererOptions: {
-                                        c3: {
-                                            tooltip: {
-                                                show: true
-                                            },
-                                        }
-                                    }
-
-                                });
-
-                                document.getElementById("loading").style.display = 'none'
-
-                            });
+                        console.log(`sheetname is ${sheet}`)
                     });
                 });
+
+                Promise.all(sheet_results)
+                    .then(res => {
+                        const downtimeResults = []
+                        const cartResults = []
+
+                        res.map(sheet_entry => {
+                            downtimeResults.push(...sheet_entry.downtimeEntries)
+                            cartResults.push(...sheet_entry.cartIssues)
+                        });
+
+                        global_downtime_result = downtimeResults;
+                        const sort_by_leg = {}
+
+                        console.log(downtimeResults);
+                        downtimeResults.map((row, idx) => {
+                            if (idx != 0) {
+                                let keys = Object.keys(sort_by_leg);
+
+                                if (row[3] === undefined) {
+                                    console.log(row)
+                                }
+
+                                if (!keys.includes(row[1])) {
+                                    console.log('this')
+                                    sort_by_leg[row[1]] = parseInt(row[3])
+                                } else {
+                                    sort_by_leg[row[1]] = sort_by_leg[row[1]] + parseInt(row[3])
+                                };
+                            };
+
+
+                        });
+
+                        // sort station by highest downtime and render top 8 in pie chart
+                        // Create items array
+                        var items = Object.keys(sort_by_leg).map(function (key) {
+                            return [key, sort_by_leg[key]];
+                        });
+
+                        // Sort the array based on the second element
+                        items.sort(function (first, second) {
+                            return second[1] - first[1];
+                        });
+
+
+                        // Create a new array with only the first 8 items
+                        console.log(items.slice(0, 8));
+
+                        let final_render = items.slice(0, 8);
+
+                        // Calculate total downtime
+                        let total_downtime = items.reduce((prevVal, currVal) => {
+                            return prevVal + parseInt(currVal[1])
+                        }, 0)
+
+                        // get percentage downtime for each of the top 8 legs
+                        let percentages = final_render
+                            .map(val => {
+                                return ((parseInt(val[1]) / parseInt(total_downtime) * 100).toString().slice(0, 4) + "%")
+                            })
+
+                        // deletes old chart (if exists)
+                        deleteChart()
+
+                        // creates new chart from data
+                        createChart(final_render, percentages)
+
+                        downtimeResults.forEach(row => {
+                            row[9] = new Date(row[9])
+                        })
+
+                        console.log(`FINAL DATASET IS \n ${JSON.stringify(downtimeResults)}`)
+
+                        if (dataTableSet) {
+                            $("#data").dataTable().fnDestroy()
+                        };
+
+                        $('#data').DataTable({
+                            "aaData": downtimeResults,
+                            "aoColumns": [
+                                { "title": "Cart" },
+                                { "title": "Location" },
+                                { "title": "Issue" },
+                                { "title": "Downtime (s)" },
+                                { "title": "Root Cause" },
+                                { "title": "Reason" },
+                                { "title": "Corrective Action" },
+                                { "title": "Owner" },
+                                { "title": "Shift" },
+                                {
+                                    "title": "Date",
+                                    "type": "date",
+                                    "render": function (value) {
+
+                                        var dt = new Date(value);
+
+                                        return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
+                                    }
+                                },
+                                { "title": "Time" }
+                            ],
+                            order: [[3, 'desc']]
+                        });
+
+                        dataTableSet = true
+
+                        const uniqueLocs = new Set(downtimeResults.map(row => row[1]))
+
+                        console.log(uniqueLocs)
+
+                        const pivotTableRes = downtimeResults.map((
+                            [Cart, Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time]
+                        ) => ({
+                            Cart, Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time
+                        }))
+
+                        const dates = []
+
+                        pivotTableRes.map(row => {
+                            areaMapper(row)
+                            row['Cart'].trim()
+                            row['Issue'].trim()
+                            row['Reason'].trim()
+                            row['RootCause'].trim()
+
+                            Object.defineProperty(row, 'Downtime (s)',
+                                Object.getOwnPropertyDescriptor(row, 'Downtime'));
+                            delete row['Downtime'];
+
+                            row['Week'] = getWeek(new Date(row['Date']))
+                        })
+
+                        console.log(`dates are ${JSON.stringify(dates)}`);
+
+                        var derivers = $.pivotUtilities.derivers;
+                        var renderers = $.extend($.pivotUtilities.renderers,
+                            $.pivotUtilities.c3_renderers);
+
+                        $("#output").pivotUI(pivotTableRes, {
+                            renderers: renderers,
+                            cols: ["Leg Name"],
+                            rows: ["Issue"],
+                            rowOrder: "value_a_to_z",
+                            colOrder: "value_z_to_a",
+                            aggregatorName: "Sum",
+                            hiddenAttributes: ["Time"],
+                            rendererName: "Stacked Bar Chart",
+                            rendererOptions: {
+                                c3: {
+                                    tooltip: {
+                                        show: true
+                                    },
+                                }
+                            }
+
+                        });
+
+                        document.getElementById("loading").style.display = 'none'
+
+                    });
+            });
 
         }, false);
 
