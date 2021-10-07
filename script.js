@@ -153,15 +153,25 @@ var interval = setInterval(function () {
 
                         console.log(uniqueLocs)
 
-                        const pivotTableRes = downtimeResults.map((
+                        const downtimePivotResults = downtimeResults.map((
                             [Cart, Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time]
                         ) => ({
                             Cart, Location, Issue, Downtime, RootCause, Reason, CorrectiveAction, Owner, Shift, Date, Time
                         }))
 
+                        const cartIssuesPivotResults = cartResults.map((
+                            [Cart, Description, WorkOrderNumber]
+                        ) => (
+                            {
+                                Cart,
+                                Description,
+                                WorkOrderNumber
+                            }
+                        ))
+
                         const dates = []
 
-                        pivotTableRes.map(row => {
+                        downtimePivotResults.map(row => {
                             areaMapper(row)
                             row['Cart'].trim()
                             row['Issue'].trim()
@@ -181,7 +191,7 @@ var interval = setInterval(function () {
                         var renderers = $.extend($.pivotUtilities.renderers,
                             $.pivotUtilities.c3_renderers);
 
-                        $("#output").pivotUI(pivotTableRes, {
+                        $("#downtimePivotTable").pivotUI(downtimePivotResults, {
                             renderers: renderers,
                             cols: ["Leg Name"],
                             rows: ["Issue"],
@@ -200,7 +210,25 @@ var interval = setInterval(function () {
 
                         });
 
+                        $("#cartIssuesPivotTable").pivotUI(cartIssuesPivotResults, {
+                            renderers: renderers,
+                            rows: ["Cart"],
+                            rowOrder: "value_z_to_a",
+                            colOrder: "value_a_to_z",
+                            aggregatorName: "Count",
+                            rendererName: "Col Heatmap",
+                            rendererOptions: {
+                                c3: {
+                                    tooltip: {
+                                        show: true
+                                    },
+                                }
+                            }
+
+                        });
+
                         document.getElementById("loading").style.display = 'none'
+                        document.getElementById("outputarea").hidden = false
 
                     });
             });
@@ -285,18 +313,18 @@ async function readDowntimeEntries(formatted_data, startIndexArray) {
             if (formatted_data[i][2] === null || formatted_data[i][2] === undefined) {
                 break;
             };
-    
+
             let raw_row = formatted_data[i]
-    
+
             console.log(formatted_data[i][2])
-    
+
             let row = [raw_row[0], raw_row[2], raw_row[3], cleanNumber(raw_row[5]), raw_row[6], raw_row[9], raw_row[12], raw_row[14], cleanNumber(raw_row[16]), raw_row[17], cleanNumber(raw_row[18])]
             let cleaned_row = getCleanedRow(row)
-    
+
             if (cleaned_row.length !== 0) {
                 sheet_rows.push(cleaned_row)
             };
-    
+
         };
     } catch (err) {
         console.error(err.message)
