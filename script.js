@@ -2,6 +2,7 @@
 
 let dataTableSet = false;
 let global_downtime_result = [];
+let global_cart_result = [];
 
 var interval = setInterval(function () {
     if (document.readyState === 'complete') {
@@ -10,7 +11,7 @@ var interval = setInterval(function () {
 
         document.getElementById("download_xlsx").addEventListener("click", () => {
             console.log(global_downtime_result)
-            saveFile(global_downtime_result)
+            saveFile(global_downtime_result, global_cart_result)
         })
 
         document.getElementById("files").addEventListener("change", async (e) => {
@@ -49,7 +50,9 @@ var interval = setInterval(function () {
                             cartResults.push(...sheet_entry.cartIssues)
                         });
 
-                        global_downtime_result = downtimeResults;
+                        global_downtime_result = [...downtimeResults];
+                        global_cart_result = [...cartResults];
+
                         const sort_by_leg = {}
 
                         console.log(downtimeResults);
@@ -246,6 +249,26 @@ function findStarterElements(formatted_data, searchText) {
     return startIndexArray
 }
 
+function getCleanedRow(row) {
+    return row.map(elem => {
+
+        if (elem === null || elem === undefined || elem == `empty`) {
+            elem = "N/A"
+
+        } else {
+            try {
+                elem = elem.toUpperCase().trim()
+            } catch (error) {
+
+                // console.log(`element may be a number: ${error}\n${elem}`)
+            }
+
+        }
+
+        return elem;
+    });
+}
+
 async function readDowntimeEntries(formatted_data, startIndexArray) {
     const sheet_rows = []
 
@@ -263,23 +286,7 @@ async function readDowntimeEntries(formatted_data, startIndexArray) {
         console.log(formatted_data[i][2])
 
         let row = [raw_row[0], raw_row[2], raw_row[3], cleanNumber(raw_row[5]), raw_row[6], raw_row[9], raw_row[12], raw_row[14], cleanNumber(raw_row[16]), raw_row[17], cleanNumber(raw_row[18])]
-        let cleaned_row = row.map(elem => {
-
-            if (elem === null || elem === undefined || elem == `empty`) {
-                elem = "N/A"
-
-            } else {
-                try {
-                    elem = elem.toUpperCase().trim()
-                } catch (error) {
-
-                    // console.log(`element may be a number: ${error}\n${elem}`)
-                }
-
-            }
-
-            return elem;
-        });
+        let cleaned_row = getCleanedRow(row)
 
         if (cleaned_row.length !== 0) {
             sheet_rows.push(cleaned_row)
@@ -298,30 +305,16 @@ async function readCartIssues(formatted_data, startIndexArray) {
     console.log(`start index is ${start_idx}`);
 
     for (let i = start_idx; i < formatted_data.length; i++) {
-        if (formatted_data[i][0] === null || formatted_data[i][0] === undefined) {
+        const firstCell = formatted_data[i][0];
+
+        if (firstCell === null || firstCell === undefined || firstCell.toUpperCase() === "DRIVE WHEEL SLIPS BY LEG") {
             break;
         };
 
         let raw_row = formatted_data[i]
 
         let row = [raw_row[0], raw_row[3], raw_row[17]]
-        let cleaned_row = row.map(elem => {
-
-            if (elem === null || elem === undefined || elem == `empty`) {
-                elem = "N/A"
-
-            } else {
-                try {
-                    elem = elem.toUpperCase().trim()
-                } catch (error) {
-
-                    // console.log(`element may be a number: ${error}\n${elem}`)
-                }
-
-            }
-
-            return elem;
-        });
+        let cleaned_row = getCleanedRow(row)
 
         if (cleaned_row.length !== 0) {
             sheet_rows.push(cleaned_row)
@@ -355,11 +348,21 @@ async function readSheet(worksheet) {
     });
 };
 
-function saveFile(data) {
-    data.unshift(["Cart", "Location", "Issue", "Downtime", "RootCause", "Reason", "CorrectiveAction", "Owner", "Shift", "Date", "Time"])
+function saveFile(downtime, cart) {
+    console.log(cart);
+    const downtimeResults = [...downtime]
+    const cartResults = [...cart]
+
+    downtimeResults.unshift(["Cart", "Location", "Issue", "Downtime", "RootCause", "Reason", "CorrectiveAction", "Owner", "Shift", "Date", "Time"])
+    cartResults.unshift(["Cart", "Description", "Work Order #"])
+
     const book = XLSX.utils.book_new();
-    const sheet = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(book, sheet, 'EOS_Compiled_Data');
+    const downtimeSheet = XLSX.utils.aoa_to_sheet(downtimeResults);
+    const cartSheet = XLSX.utils.aoa_to_sheet(cartResults)
+
+    XLSX.utils.book_append_sheet(book, downtimeSheet, 'EOS_Compiled_Data');
+    XLSX.utils.book_append_sheet(book, cartSheet, 'Cart_Issues_Compiled');
+
     XLSX.writeFile(book, `EOS_Report_RawData.xlsx`);
 };
 
@@ -374,15 +377,15 @@ function cleanNumber(number) {
 }
 
 function deleteChart() {
-    document.getElementById("myChart").remove();
+    document.getElementById("stationVsDowntimeSummary").remove();
 }
 
 function createChart(final_render, percentages) {
     let canvas = document.createElement("canvas");
-    canvas.setAttribute("id", "myChart");
+    canvas.setAttribute("id", "stationVsDowntimeSummary");
     document.querySelector("#chart_holder").appendChild(canvas);
 
-    let ctx = document.getElementById("myChart");
+    let ctx = document.getElementById("stationVsDowntimeSummary");
 
     let chart = new Chart(ctx, {
         type: 'bar',
@@ -438,7 +441,7 @@ function createChart(final_render, percentages) {
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
 
-                    chartInstance.data.datasets.forEach(function (dataset, i) {
+                    chartInstance.data.datasets.forEach(function (_, i) {
                         let meta = chartInstance.getDatasetMeta(i)
                         meta.data.forEach(function (bar, index) {
                             ctx.fillText(percentages[index], bar.x, bar.y - 5);
