@@ -3,6 +3,7 @@
 let dataTableSet = false;
 let global_downtime_result = [];
 let global_cart_result = [];
+const invalidSheetNames = ["template", "dropdown list"]
 
 var interval = setInterval(function () {
     if (document.readyState === 'complete') {
@@ -32,7 +33,7 @@ var interval = setInterval(function () {
                     console.log(`there are ${sheets.length} sheets`)
 
                     sheets.map(sheet => {
-                        if (sheet.toLowerCase() !== "template") {
+                        if (!invalidSheetNames.includes(sheet.toLowerCase())) {
                             sheet_results.push(readSheet(workbook.Sheets[sheet]))
                         }
 
@@ -270,29 +271,38 @@ function getCleanedRow(row) {
 }
 
 async function readDowntimeEntries(formatted_data, startIndexArray) {
-    const sheet_rows = []
+    let sheet_rows = []
 
-    let start_idx = startIndexArray[1][0] + 2
+    console.log(startIndexArray)
 
-    console.log(`start index is ${start_idx}`);
+    try {
 
-    for (let i = start_idx; i < formatted_data.length; i++) {
-        if (formatted_data[i][2] === null || formatted_data[i][2] === undefined) {
-            break;
+        let start_idx = startIndexArray[1][0] + 2
+
+        console.log(`start index is ${start_idx}`);
+
+        for (let i = start_idx; i < formatted_data.length; i++) {
+            if (formatted_data[i][2] === null || formatted_data[i][2] === undefined) {
+                break;
+            };
+    
+            let raw_row = formatted_data[i]
+    
+            console.log(formatted_data[i][2])
+    
+            let row = [raw_row[0], raw_row[2], raw_row[3], cleanNumber(raw_row[5]), raw_row[6], raw_row[9], raw_row[12], raw_row[14], cleanNumber(raw_row[16]), raw_row[17], cleanNumber(raw_row[18])]
+            let cleaned_row = getCleanedRow(row)
+    
+            if (cleaned_row.length !== 0) {
+                sheet_rows.push(cleaned_row)
+            };
+    
         };
+    } catch (err) {
+        console.error(err.message)
+        sheet_rows = []
+    }
 
-        let raw_row = formatted_data[i]
-
-        console.log(formatted_data[i][2])
-
-        let row = [raw_row[0], raw_row[2], raw_row[3], cleanNumber(raw_row[5]), raw_row[6], raw_row[9], raw_row[12], raw_row[14], cleanNumber(raw_row[16]), raw_row[17], cleanNumber(raw_row[18])]
-        let cleaned_row = getCleanedRow(row)
-
-        if (cleaned_row.length !== 0) {
-            sheet_rows.push(cleaned_row)
-        };
-
-    };
 
     return sheet_rows
 }
@@ -336,6 +346,12 @@ async function readSheet(worksheet) {
             let formatted_data = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
 
             const startIndexArray = findStarterElements(formatted_data, "AGC ISSUES")
+
+            if (startIndexArray.length === 0) {
+                reject([])
+            }
+
+            console.log(`START INDEX ARRAY IS ${startIndexArray}`)
 
             sheet_rows.downtimeEntries = await readDowntimeEntries(formatted_data, startIndexArray)
             sheet_rows.cartIssues = await readCartIssues(formatted_data, startIndexArray)
