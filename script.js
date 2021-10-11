@@ -3,7 +3,7 @@
 let dataTableSet = false;
 let globalDowntimeResults = [];
 let globalCartResults = [];
-const invalidSheetNames = ["template", "dropdown list"]
+const invalidSheetNames = ["template", "dropdown list", "drop down list"]
 
 var interval = setInterval(function () {
     if (document.readyState === 'complete') {
@@ -25,6 +25,11 @@ var interval = setInterval(function () {
     }
 }, 100);
 
+
+/**
+ * Reads Excel workbooks, gets and sorts data, draws charts, draws pivottables
+ * @param {Event} e - file/(s) upload
+ */
 async function main(e) {
     document.getElementById("download_xlsx").style.display = "";
 
@@ -32,12 +37,12 @@ async function main(e) {
     document.getElementById("data").innerHTML = "";
     document.getElementById("loading").style.display = 'flex';
 
-    const fileContents = await readFiles(e);
-    
+    const fileContents = readFiles(e);
+
 
     Promise.all(fileContents).then(data => {
         const sheet_results = [];
-    
+
         data.forEach(workbook => {
             readWorkbook(workbook, sheet_results);
         });
@@ -83,6 +88,11 @@ async function main(e) {
     });
 }
 
+/**
+ * Reads donwtimeEntries from 
+ * @param {Array<Array<String>>} sheetResults 
+ * @returns {Array<Array<String>>} downtimeResults, cartResults
+ */
 function setGlobalResults(sheetResults) {
     const downtimeResults = [];
     const cartResults = [];
@@ -274,7 +284,12 @@ function createDowntimeDatatable(downtimeResults) {
     dataTableSet = true
 }
 
-async function readFiles(e) {
+/**
+ * Reads uploaded files as ArrayBuffer, converts them to XLSX workbooks using SheetJS, returns an array of promises
+ * @param {Event} e 
+ * @returns {Promise<Promise<Array>>} Array of Promises, where each promise is an Excel workbook
+ */
+function readFiles(e) {
     const file_promises = [];
 
     let fileList = e.target.files, f = fileList[0];
@@ -285,13 +300,15 @@ async function readFiles(e) {
         const promise = new Promise((resolve, reject) => {
             const fileReader = new FileReader();
             fileReader.readAsArrayBuffer(file);
-            fileReader.onload = (e) => {
-                console.log("Here", e.target.result);
+            fileReader.onload = () => {
+                try {
+                    let data = new Uint8Array(fileReader.result);
+                    let workbook = XLSX.read(data, { type: 'array' });
 
-                let data = new Uint8Array(fileReader.result);
-                let workbook = XLSX.read(data, { type: 'array' });
-
-                resolve(workbook);
+                    resolve(workbook);
+                } catch (err) {
+                    reject([])
+                }
             };
         });
 
@@ -303,9 +320,16 @@ async function readFiles(e) {
 
 };
 
-function findStarterElements(formatted_data, searchText) {
+/**
+ * Finds all matches for the left-most cell in one worksheet with the specified searchText
+ * @param {Array<Array<String>>} formattedData - cells in one worksheet
+ * @param {String} searchText - the elements you want to find in the worksheet
+ * @returns {Array<Array<[Number, String]>>}
+ */
+function findStarterElements(formattedData, searchText) {
+    console.log(`FILTEREDDATA IS ${JSON.stringify(formattedData)}`);
     let startIndexArray = []
-    formatted_data.filter((elem, index) => {
+    formattedData.filter((elem, index) => {
         if (elem[0] === searchText.toString()) {
             startIndexArray.push([index, ...elem])
         }
@@ -313,6 +337,11 @@ function findStarterElements(formatted_data, searchText) {
     return startIndexArray
 }
 
+/**
+ * Converts null, undefined, 'empty' (from SheetJS) to "N/A", converts all text to uppercase and trims whitespace
+ * @param {Array<String>} row 
+ * @returns {Array<String>}
+ */
 function getCleanedRow(row) {
     return row.map(elem => {
 
@@ -333,58 +362,72 @@ function getCleanedRow(row) {
     });
 }
 
-async function readDowntimeEntries(formatted_data, startIndexArray) {
-    let sheet_rows = []
+/**
+ * Reads downtime entries from XLSX sheet from row in startIndexArray, cleans strings and numbers using {@link getCleanedRow} and {@link cleanNumber}.
+ * Returns sheet with downtime entries.
+ * @param {Array<Array<String>>} formattedData - cells in one worksheet
+ * @param {Array<Array<[Number, String]>>} startIndexArray 
+ * @returns {Array<Array<String>>}
+ */
+async function readDowntimeEntries(formattedData, startIndexArray) {
+    let sheetRows = []
 
     console.log(startIndexArray)
 
     try {
 
-        let start_idx = startIndexArray[1][0] + 2
+        let startIdx = startIndexArray[1][0] + 2
 
-        console.log(`start index is ${start_idx}`);
+        console.log(`start index is ${startIdx}`);
 
-        for (let i = start_idx; i < formatted_data.length; i++) {
-            if (formatted_data[i][2] === null || formatted_data[i][2] === undefined) {
+        for (let i = startIdx; i < formattedData.length; i++) {
+            if (formattedData[i][2] === null || formattedData[i][2] === undefined) {
                 break;
             };
 
-            let raw_row = formatted_data[i]
+            let raw_row = formattedData[i]
 
-            console.log(formatted_data[i][2])
+            console.log(formattedData[i][2])
 
             let row = [raw_row[0], raw_row[2], raw_row[3], cleanNumber(raw_row[5]), raw_row[6], raw_row[9], raw_row[12], raw_row[14], cleanNumber(raw_row[16]), raw_row[17], cleanNumber(raw_row[18])]
             let cleaned_row = getCleanedRow(row)
 
             if (cleaned_row.length !== 0) {
-                sheet_rows.push(cleaned_row)
+                sheetRows.push(cleaned_row)
             };
 
         };
     } catch (err) {
         console.error(err.message)
-        sheet_rows = []
+        sheetRows = []
     }
 
 
-    return sheet_rows
+    return sheetRows
 }
 
-async function readCartIssues(formatted_data, startIndexArray) {
+/**
+ * Reads downtime entries from XLSX sheet from row in startIndexArray, cleans strings and numbers using {@link getCleanedRow} and {@link cleanNumber}.
+ * Returns sheet with downtime entries.
+ * @param {Array<Array<String>>} formattedData - cells in one worksheet
+ * @param {Array<Array<[Number, String]>>} startIndexArray 
+ * @returns {Array<Array<String>>}
+ */
+async function readCartIssues(formattedData, startIndexArray) {
     const sheet_rows = []
 
     let start_idx = startIndexArray[0][0] + 2
 
     console.log(`start index is ${start_idx}`);
 
-    for (let i = start_idx; i < formatted_data.length; i++) {
-        const firstCell = formatted_data[i][0];
+    for (let i = start_idx; i < formattedData.length; i++) {
+        const firstCell = formattedData[i][0];
 
         if (firstCell === null || firstCell === undefined || firstCell.toUpperCase() === "DRIVE WHEEL SLIPS BY LEG") {
             break;
         };
 
-        let raw_row = formatted_data[i]
+        let raw_row = formattedData[i]
 
         let row = [raw_row[0], raw_row[3], raw_row[17]]
         let cleaned_row = getCleanedRow(row)
@@ -406,9 +449,9 @@ async function readSheet(worksheet) {
 
             console.log('readaing sheet');
 
-            let formatted_data = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
+            let formattedData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
 
-            const startIndexArray = findStarterElements(formatted_data, "AGC ISSUES")
+            const startIndexArray = findStarterElements(formattedData, "AGC ISSUES")
 
             if (startIndexArray.length === 0) {
                 reject([])
@@ -416,8 +459,8 @@ async function readSheet(worksheet) {
 
             console.log(`START INDEX ARRAY IS ${startIndexArray}`)
 
-            sheet_rows.downtimeEntries = await readDowntimeEntries(formatted_data, startIndexArray)
-            sheet_rows.cartIssues = await readCartIssues(formatted_data, startIndexArray)
+            sheet_rows.downtimeEntries = await readDowntimeEntries(formattedData, startIndexArray)
+            sheet_rows.cartIssues = await readCartIssues(formattedData, startIndexArray)
 
 
             resolve(sheet_rows);
