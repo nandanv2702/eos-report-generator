@@ -3,7 +3,7 @@
 let dataTableSet = false;
 let globalDowntimeResults = [];
 let globalCartResults = [];
-const invalidSheetNames = ["template", "dropdown list", "drop down list"]
+const invalidSheetNames = ["template", "dropdown list", "drop down list", "drop down"]
 
 var interval = setInterval(function () {
     if (document.readyState === 'complete') {
@@ -113,7 +113,7 @@ function readWorkbook(workbook, sheet_results) {
     console.log(`there are ${sheets.length} sheets`);
 
     sheets.map(sheetName => {
-        if (!invalidSheetNames.includes(sheetName.toLowerCase())) {
+        if (!invalidSheetNames.includes(sheetName.trim().toLowerCase())) {
             sheet_results.push(readSheet(workbook.Sheets[sheetName]));
         }
 
